@@ -382,8 +382,18 @@
         <div class="arrived-badge" id="arrived-badge">SAMPAI</div>
     </div>
 
-    <!-- Dynamic Actions (Activate sensors / Push notification subscription) -->
+    <!-- Dynamic Actions (Activate sensors / Push notification subscription / Floor Plan) -->
     <div id="btn-wrap">
+        <button id="btn-checkin" class="btn btn-emerald" onclick="openCheckInModal()">
+            <span>✓</span>
+            <span>SAHKAN KESELAMATAN (CHECK-IN)</span>
+        </button>
+
+        <button id="btn-floorplan" class="btn btn-dim" onclick="openFloorPlanModal()">
+            <span>🗺️</span>
+            <span>Pelan Tangga Kecemasan Bangunan</span>
+        </button>
+
         <button id="btn-push-subscribe" class="btn btn-dim" onclick="subscribeWebPush()">
             <span>🔔</span>
             <span>Daftar Notifikasi Telefon</span>
@@ -395,6 +405,114 @@
 <div id="arrived-overlay">
     <div class="arrived-big">✓ SAMPAI</div>
     <div class="arrived-sub">ANDA TELAH TIBA DI TITIK BERKUMPUL ADTEC</div>
+    <button class="btn btn-emerald" style="max-width:280px; margin-top:16px;" onclick="closeArrivedOverlay(); openCheckInModal();">
+        <span>✓ DAFTAR KEHADIRAN SELAMAT</span>
+    </button>
+</div>
+
+<!-- Modal Check-in Keselamatan -->
+<div id="modal-checkin" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:60;display:none;align-items:center;justify-content:center;padding:20px;">
+    <div class="modal-box" style="background:#162032;border:1px solid #334155;border-radius:12px;padding:22px;width:100%;max-width:380px;">
+        <div class="modal-title" style="color:#00e676;font-size:1.1rem;display:flex;align-items:center;gap:8px;">
+            <span>🛡️</span>
+            <span>Daftar Status Keselamatan</span>
+        </div>
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:#94a3b8;margin-bottom:14px;">
+            Sahkan bahawa anda telah selamat keluar daripada bangunan untuk rekod headcount warden keselamatan ADTEC Kuantan.
+        </p>
+
+        <form id="checkin-form" onsubmit="submitCheckIn(event)" style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+                <label style="display:block;font-size:0.7rem;text-transform:uppercase;color:#94a3b8;font-family:'Share Tech Mono',monospace;margin-bottom:4px;">Nama Penghuni / Pelajar</label>
+                <input type="text" id="checkin-name" placeholder="cth: Ahmad Bin Razak"
+                       style="width:100%;background:#070a0f;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.85rem;outline:none;">
+            </div>
+
+            <div>
+                <label style="display:block;font-size:0.7rem;text-transform:uppercase;color:#94a3b8;font-family:'Share Tech Mono',monospace;margin-bottom:4px;">No. Kad Pengenalan / Matrik (Pilihan)</label>
+                <input type="text" id="checkin-matric" placeholder="cth: ADTEC-2024-0199"
+                       style="width:100%;background:#070a0f;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.85rem;outline:none;">
+            </div>
+
+            <div>
+                <label style="display:block;font-size:0.7rem;text-transform:uppercase;color:#94a3b8;font-family:'Share Tech Mono',monospace;margin-bottom:4px;">Status Keadaan Anda</label>
+                <select id="checkin-status" style="width:100%;background:#070a0f;border:1px solid #334155;border-radius:6px;padding:10px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:0.85rem;outline:none;">
+                    <option value="SAFE">🟢 SELAMAT DI PADANG ADTEC</option>
+                    <option value="INJURED">🟡 MENGALAMI KECEDERAAN RINGAN</option>
+                    <option value="TRAPPED">🔴 PERLUKAN BANTUAN SEGERA</option>
+                </select>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:10px;">
+                <button type="submit" id="btn-submit-checkin" class="btn btn-emerald" style="flex:1;">
+                    <span>HANTAR STATUS</span>
+                </button>
+                <button type="button" class="btn btn-dim" style="width:auto;padding:10px 16px;" onclick="closeCheckInModal()">
+                    ✕
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Pelan Lantai Tangga Kecemasan (Indoor Backup) -->
+<div id="modal-floorplan" style="position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:60;display:none;align-items:center;justify-content:center;padding:16px;">
+    <div style="background:#162032;border:1px solid #334155;border-radius:12px;padding:20px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid #334155;padding-bottom:8px;">
+            <div style="font-weight:700;color:#ff6a00;font-size:0.95rem;letter-spacing:1px;">🗺️ PELAN TANGGA KECEMASAN ADTEC</div>
+            <button onclick="closeFloorPlanModal()" style="background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;">✕</button>
+        </div>
+
+        <p style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#94a3b8;margin-bottom:12px;">
+            Gunakan pelan ini sekiranya isyarat GPS satelit lemah atau hilang sewaktu berada di dalam blok bangunan bertingkat.
+        </p>
+
+        <!-- Tactical SVG Floor Diagram -->
+        <div style="background:#070a0f;border:1px solid #223049;border-radius:8px;padding:12px;display:flex;justify-content:center;">
+            <svg viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+                <!-- Building Outline -->
+                <rect x="20" y="20" width="320" height="170" rx="8" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+                <text x="180" y="42" fill="#64748b" font-size="11" font-family="monospace" text-anchor="middle" font-weight="bold">BLOK AKADEMIK & BENGKEL ADTEC</text>
+
+                <!-- Rooms -->
+                <rect x="35" y="55" width="80" height="55" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <text x="75" y="86" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">MAKMAL 1</text>
+
+                <rect x="130" y="55" width="100" height="55" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <text x="180" y="86" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">KORIDOR UTAMA</text>
+
+                <rect x="245" y="55" width="80" height="55" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+                <text x="285" y="86" fill="#94a3b8" font-size="9" font-family="monospace" text-anchor="middle">MAKMAL 2</text>
+
+                <!-- Fire Stairs Left -->
+                <rect x="35" y="125" width="80" height="50" fill="#450a0a" stroke="#dc2626" stroke-width="1.5"/>
+                <text x="75" y="148" fill="#f87171" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">TANGGA A</text>
+                <text x="75" y="162" fill="#ef4444" font-size="8" font-family="monospace" text-anchor="middle">🔥 KELUAR</text>
+
+                <!-- Fire Stairs Right -->
+                <rect x="245" y="125" width="80" height="50" fill="#450a0a" stroke="#dc2626" stroke-width="1.5"/>
+                <text x="285" y="148" fill="#f87171" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">TANGGA B</text>
+                <text x="285" y="162" fill="#ef4444" font-size="8" font-family="monospace" text-anchor="middle">🔥 KELUAR</text>
+
+                <!-- Main Exit -->
+                <rect x="145" y="175" width="70" height="15" fill="#065f46" stroke="#10b981" stroke-width="1"/>
+                <text x="180" y="186" fill="#34d399" font-size="8" font-family="monospace" text-anchor="middle" font-weight="bold">PINTU KELUAR</text>
+
+                <!-- Green Arrow to Field -->
+                <line x1="180" y1="195" x2="180" y2="225" stroke="#00e676" stroke-width="3" stroke-dasharray="4,2"/>
+                <polygon points="180,235 174,222 186,222" fill="#00e676"/>
+                <text x="180" y="252" fill="#00e676" font-size="10" font-family="monospace" text-anchor="middle" font-weight="bold">KE PADANG ADTEC KUANTAN ➔</text>
+            </svg>
+        </div>
+
+        <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:#cbd5e1;line-height:1.5;">
+            <p style="color:#f87171;font-weight:bold;">SOP Kecemasan Dalam Bangunan:</p>
+            <p>1. Ambil tangga kecemasan terdekat (Tangga A di sayap kiri atau Tangga B di sayap kanan).</p>
+            <p>2. Tolak pintu keluar kecemasan dan terus bergerak ke arah Padang ADTEC.</p>
+        </div>
+
+        <button class="btn btn-dim" style="margin-top:14px;" onclick="closeFloorPlanModal()">TUTUP PELAN</button>
+    </div>
 </div>
 
 <!-- Modal Panduan Sensor -->
@@ -703,6 +821,68 @@
     function showModal() { document.getElementById('modal-overlay').classList.add('show'); }
     function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
 
+    // ── CHECK-IN & FLOORPLAN MODAL HELPERS ──────────────────
+    function openCheckInModal() {
+        document.getElementById('modal-checkin').style.display = 'flex';
+    }
+    function closeCheckInModal() {
+        document.getElementById('modal-checkin').style.display = 'none';
+    }
+    function closeArrivedOverlay() {
+        document.getElementById('arrived-overlay').classList.remove('show');
+    }
+    function openFloorPlanModal() {
+        document.getElementById('modal-floorplan').style.display = 'flex';
+    }
+    function closeFloorPlanModal() {
+        document.getElementById('modal-floorplan').style.display = 'none';
+    }
+
+    async function submitCheckIn(event) {
+        event.preventDefault();
+        const btn = document.getElementById('btn-submit-checkin');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>⏳ Menghantar...</span>';
+        btn.disabled = true;
+
+        const payload = {
+            name: document.getElementById('checkin-name').value || 'Penghuni ADTEC',
+            matric_no: document.getElementById('checkin-matric').value || null,
+            status: document.getElementById('checkin-status').value,
+            latitude: userLat,
+            longitude: userLng,
+            device_id: navigator.userAgent
+        };
+
+        try {
+            const res = await fetch('/api/evacuee/check-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message || 'Pendaftaran kehadiran berjaya direkodkan!');
+                closeCheckInModal();
+                const mainBtn = document.getElementById('btn-checkin');
+                if (mainBtn) {
+                    mainBtn.innerHTML = '<span>✓</span><span>STATUS TERKINI: ' + payload.status + '</span>';
+                }
+            } else {
+                alert('Gagal menghantar pendaftaran status.');
+            }
+        } catch (e) {
+            console.error("Check-in error:", e);
+            alert('Ralat rangkaian semasa menghantar pendaftaran.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
     // ── REALTIME EMERGENCY STATUS POLLING (Every 3 seconds) ────
     async function checkEmergencyStatus() {
         try {
@@ -846,3 +1026,4 @@
 </script>
 </body>
 </html>
+

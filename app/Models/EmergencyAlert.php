@@ -31,6 +31,11 @@ class EmergencyAlert extends Model
         return $this->belongsTo(AssemblyPoint::class);
     }
 
+    public function checkIns()
+    {
+        return $this->hasMany(EvacueeCheckIn::class);
+    }
+
     public static function getActiveAlert()
     {
         return self::with('assemblyPoint')

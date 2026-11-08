@@ -31,6 +31,16 @@ class AdminController extends Controller
         $activeAssemblyPoint = AssemblyPoint::where('is_active', true)->first()
             ?? $assemblyPoints->first();
 
+        // Check-ins for active alert or latest
+        $checkInsQuery = \App\Models\EvacueeCheckIn::query();
+        if ($activeAlert) {
+            $checkInsQuery->where('emergency_alert_id', $activeAlert->id);
+        }
+        $recentCheckIns = (clone $checkInsQuery)->latest()->take(30)->get();
+        $safeCount = (clone $checkInsQuery)->where('status', 'SAFE')->count();
+        $injuredCount = (clone $checkInsQuery)->where('status', 'INJURED')->count();
+        $trappedCount = (clone $checkInsQuery)->where('status', 'TRAPPED')->count();
+
         return view('admin.dashboard', compact(
             'activeAlert',
             'assemblyPoints',
@@ -38,7 +48,11 @@ class AdminController extends Controller
             'recentAlerts',
             'subscriberCount',
             'emergencyPin',
-            'sirenEnabled'
+            'sirenEnabled',
+            'recentCheckIns',
+            'safeCount',
+            'injuredCount',
+            'trappedCount'
         ));
     }
 
@@ -195,3 +209,4 @@ class AdminController extends Controller
             ->with('status', 'Konfigurasi sistem keselamatan berjaya dikemaskini.');
     }
 }
+

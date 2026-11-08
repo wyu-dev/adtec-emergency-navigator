@@ -76,3 +76,4 @@ class AuthController extends Controller
             ->with('status', 'Anda telah log keluar daripada sistem.');
     }
 }
+

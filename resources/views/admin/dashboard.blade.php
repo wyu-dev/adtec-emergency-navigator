@@ -94,17 +94,93 @@
             </button>
         </div>
 
-        <!-- Card 4: Quick PWA Shortcut -->
+        <!-- Card 4: Quick PWA Shortcut & QR -->
         <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
             <div>
                 <div class="text-xs font-mono-tech text-slate-400 uppercase tracking-wider mb-1">Aplikasi Navigasi PWA</div>
                 <div class="text-sm font-bold text-slate-200">Panduan Kompas Telefon</div>
                 <div class="text-xs font-mono-tech text-emerald-400 mt-1">✓ PWA Ready & Offline</div>
             </div>
-            <a href="{{ route('evacuation.client') }}" target="_blank"
-               class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-lg transition border border-slate-700" title="Buka Navigasi">
-                🧭
-            </a>
+            <div class="flex items-center gap-1.5">
+                <button onclick="openQrModal()" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg text-sm transition border border-slate-700" title="Jana Kod QR">
+                    🖨️ QR
+                </button>
+                <a href="{{ route('evacuation.client') }}" target="_blank"
+                   class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-lg transition border border-slate-700" title="Buka Navigasi">
+                    🧭
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.5 LIVE MUSTER HEADCOUNT SECTION -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-bold text-white tracking-wider uppercase flex items-center gap-2">
+                    <span>🛡️</span>
+                    <span>Status Kehadiran & Keselamatan Mangsa (Live Headcount)</span>
+                </h3>
+                <p class="text-xs text-slate-400 font-mono-tech">
+                    Data pendaftaran langsung penghuni yang telah selamat tiba di titik berkumpul.
+                </p>
+            </div>
+            <div class="flex items-center gap-2 font-mono-tech text-xs">
+                <span class="px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-700 rounded-lg font-bold">
+                    🟢 Selamat: {{ $safeCount }}
+                </span>
+                <span class="px-3 py-1 bg-amber-950 text-amber-300 border border-amber-700 rounded-lg font-bold">
+                    🟡 Cedera: {{ $injuredCount }}
+                </span>
+                <span class="px-3 py-1 bg-red-950 text-red-300 border border-red-700 rounded-lg font-bold animate-pulse">
+                    🔴 Bantuan: {{ $trappedCount }}
+                </span>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono-tech">
+                <thead class="bg-slate-950/60 text-slate-400 uppercase border-b border-slate-800">
+                    <tr>
+                        <th class="py-3 px-4">Masa Lapor</th>
+                        <th class="py-3 px-4">Nama Penghuni</th>
+                        <th class="py-3 px-4">No. Matrik / KP</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Koordinat GPS Semasa</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                    @forelse($recentCheckIns as $ci)
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="py-3 px-4 text-slate-400">{{ $ci->created_at->format('H:i:s') }}</td>
+                            <td class="py-3 px-4 font-bold text-white">{{ $ci->name }}</td>
+                            <td class="py-3 px-4 text-slate-400">{{ $ci->matric_no ?? '-' }}</td>
+                            <td class="py-3 px-4">
+                                @if($ci->status === 'SAFE')
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold">SELAMAT</span>
+                                @elseif($ci->status === 'INJURED')
+                                    <span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">CEDERA RINGAN</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full bg-red-950 text-red-300 border border-red-700 font-bold animate-pulse">PERLUKAN BANTUAN</span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-4 text-slate-400">
+                                @if($ci->latitude && $ci->longitude)
+                                    <a href="https://maps.google.com/?q={{ $ci->latitude }},{{ $ci->longitude }}" target="_blank" class="text-amber-400 hover:underline">
+                                        {{ number_format($ci->latitude, 5) }}, {{ number_format($ci->longitude, 5) }}
+                                    </a>
+                                @else
+                                    <span class="text-slate-600">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-6 text-center text-slate-500">Belum ada rekod pendaftaran selamat daripada penghuni.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -443,10 +519,39 @@
         </form>
     </div>
 </div>
+<!-- MODAL: PRINTABLE QR CODE -->
+<div id="modal-qr" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <h3 class="text-base font-bold uppercase text-white tracking-wider">Poster QR Pendaftaran PWA</h3>
+            <button onclick="closeModal('modal-qr')" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <p class="text-xs text-slate-400 font-mono-tech">
+            Cetak atau imbas kod QR ini di pintu blok atau papan kenyataan ADTEC untuk pendaftaran pantas telefon pelajar.
+        </p>
+
+        <div class="bg-white p-4 rounded-xl inline-block shadow-lg mx-auto">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode(route('evacuation.client')) }}"
+                 alt="QR Code PWA ADTEC" class="w-48 h-48 mx-auto" />
+        </div>
+
+        <div class="text-xs text-slate-300 font-mono-tech bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all">
+            {{ route('evacuation.client') }}
+        </div>
+
+        <button onclick="window.print()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl uppercase tracking-wider text-xs transition font-mono-tech">
+            🖨️ Cetak Poster QR
+        </button>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    function openQrModal() {
+        openModal('modal-qr');
+    }
     function openModal(id) {
         document.getElementById(id).classList.remove('hidden');
     }
@@ -492,3 +597,4 @@
     }
 </script>
 @endsection
+

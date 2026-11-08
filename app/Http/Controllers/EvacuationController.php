@@ -90,4 +90,35 @@ class EvacuationController extends Controller
             'publicKey' => AdminSetting::get('vapid_public_key'),
         ]);
     }
+
+    public function checkIn(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
+            'matric_no' => ['nullable', 'string', 'max:50'],
+            'status' => ['required', 'in:SAFE,INJURED,TRAPPED'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'device_id' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $activeAlert = EmergencyAlert::getActiveAlert();
+
+        $checkIn = \App\Models\EvacueeCheckIn::create([
+            'emergency_alert_id' => $activeAlert?->id,
+            'name' => $validated['name'] ?? 'Penghuni Tanpa Nama',
+            'matric_no' => $validated['matric_no'] ?? null,
+            'status' => $validated['status'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'device_id' => $validated['device_id'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pendaftaran keselamatan anda telah direkodkan. Sila tunggu arahan warden keselamatan.',
+            'check_in' => $checkIn,
+        ]);
+    }
 }
+
