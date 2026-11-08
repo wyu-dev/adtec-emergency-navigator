@@ -14,9 +14,9 @@ class WebPushService
 
     public function __construct()
     {
-        $publicKey = AdminSetting::get('vapid_public_key');
-        $privateKey = AdminSetting::get('vapid_private_key');
-        $subject = AdminSetting::get('vapid_subject', 'mailto:admin@adtec.edu.my');
+        $publicKey = env('VAPID_PUBLIC_KEY', AdminSetting::get('vapid_public_key'));
+        $privateKey = env('VAPID_PRIVATE_KEY', AdminSetting::get('vapid_private_key'));
+        $subject = env('VAPID_SUBJECT', AdminSetting::get('vapid_subject', 'mailto:admin@adtec.edu.my'));
 
         if ($publicKey && $privateKey) {
             $auth = [

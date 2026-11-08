@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
         // 3. Admin Settings
         $settings = [
             'emergency_pin' => '9999',
-            'vapid_public_key' => 'BLDJqw-Z8xd-_P932XFrAbdT223y4KkmNlh7mK5yo7hPfIy0c6uSyIrV87Uk5v7oYiG4zl_ZWQ8ZEfjyjrKQ83I',
-            'vapid_private_key' => 'xF0bO9YfDhVB_1pEeXSmF9csS3_y3YOyPkzBXlm_Q5Q',
-            'vapid_subject' => 'mailto:admin@adtec.edu.my',
+            'vapid_public_key' => env('VAPID_PUBLIC_KEY', 'BLDJqw-Z8xd-_P932XFrAbdT223y4KkmNlh7mK5yo7hPfIy0c6uSyIrV87Uk5v7oYiG4zl_ZWQ8ZEfjyjrKQ83I'),
+            'vapid_private_key' => env('VAPID_PRIVATE_KEY', null),
+            'vapid_subject' => env('VAPID_SUBJECT', 'mailto:admin@adtec.edu.my'),
             'siren_sound_enabled' => '1',
         ];
 
