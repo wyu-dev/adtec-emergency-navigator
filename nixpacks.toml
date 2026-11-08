@@ -1,8 +1,9 @@
 [variables]
 NIXPACKS_PHP_ROOT_DIR = "/app/public"
 APP_ENV = "production"
-APP_DEBUG = "false"
+APP_DEBUG = "true"
 DB_CONNECTION = "sqlite"
+APP_KEY = "base64:wC/MXGJScGIULfoFen9Wuo46EiMcuOnyp0YBXVlaroM="
 
 [phases.setup]
 nixPkgs = ["php84", "php84Packages.composer"]
