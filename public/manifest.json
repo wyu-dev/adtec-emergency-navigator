@@ -7,6 +7,7 @@
   "theme_color": "#ff2d2d",
   "orientation": "portrait",
   "description": "Sistem Amaran Pengungsian & Panduan Navigasi Zon Berkumpul Kecemasan ADTEC Kuantan",
+  "gcm_sender_id": "103953800507",
   "icons": [
     {
       "src": "/icons/icon-192.png",
